@@ -1,45 +1,65 @@
-import React, { useState } from 'react';
-import { TextField, Button, Box } from '@mui/material';
+import React, { useEffect, useState } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import { Button, TextField, Container } from '@mui/material';
 import { Task } from '../type';
 
-interface TaskFormProps {
-    onAdd: (task: Omit<Task, 'id'>) => void;
-}
+const TaskForm: React.FC = () => {
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const [task, setTask] = useState<Task>({ title: '', description: '', isCompleted: false });
 
-const TaskForm: React.FC<TaskFormProps> = ({ onAdd }) => {
-    const [taskName, setTaskName] = useState('');
-    const [taskDescription, setTaskDescription] = useState('');
+  useEffect(() => {
+    if (id) {
+      fetchTask();
+    }
+  }, [id]);
 
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        if (taskName && taskDescription) {
-            onAdd({ name: taskName, description: taskDescription });
-            setTaskName('');
-            setTaskDescription('');
-        }
-    };
+  const fetchTask = async () => {
+    const response = await axios.get(`http://localhost:5000/api/tasks/${id}`);
+    setTask(response.data);
+  };
 
-    return (
-        <Box component="form" onSubmit={handleSubmit} sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-            <TextField
-                label="Task Name"
-                value={taskName}
-                onChange={(e) => setTaskName(e.target.value)}
-                required
-            />
-            <TextField
-                label="Task Description"
-                value={taskDescription}
-                onChange={(e) => setTaskDescription(e.target.value)}
-                required
-                multiline
-                rows={4}
-            />
-            <Button type="submit" variant="contained" color="primary">
-                Add Task
-            </Button>
-        </Box>
-    );
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
+    if (id) {
+      await axios.put(`http://localhost:5000/api/tasks/${id}`, task);
+    } else {
+      await axios.post('http://localhost:5000/api/tasks', task);
+    }
+    navigate('/');
+  };
+
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setTask({ ...task, [event.target.name]: event.target.value });
+  };
+
+  return (
+    <Container>
+      <form onSubmit={handleSubmit}>
+        <TextField
+          label="Title"
+          name="title"
+          value={task.title}
+          onChange={handleChange}
+          required
+          fullWidth
+          margin="normal"
+        />
+        <TextField
+          label="Description"
+          name="description"
+          value={task.description}
+          onChange={handleChange}
+          fullWidth
+          margin="normal"
+        />
+        <Button type="submit" variant="contained" color="primary">
+          {id ? 'Update Task' : 'Create Task'}
+        </Button>
+      </form>
+    </Container>
+  );
 };
 
 export default TaskForm;

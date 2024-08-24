@@ -1,59 +1,43 @@
-
 import { Request, Response } from 'express';
-import { openDb } from '../config/database';
-import { Task } from '../models/task';
+import TaskModel from '../models/task';
 
-export const getTasks = async (req: Request, res: Response) => {
-  try {
-    const db = await openDb();
-    const tasks = await db.all<Task[]>('SELECT * FROM tasks');
+export default class TaskController {
+  static async getAll(req: Request, res: Response): Promise<void> {
+    const tasks = await TaskModel.findAll();
     res.json(tasks);
-  } catch (error) {
-    res.status(500).json({ message: 'Failed to retrieve tasks', error });
   }
-};
 
-export const createTask = async (req: Request, res: Response) => {
-  try {
-    const db = await openDb();
-    const { name, description }: Task = req.body;
-    const result = await db.run('INSERT INTO tasks (name, description) VALUES (?, ?)', [name, description]);
-    const newTask = { id: result.lastID, name, description };
-    res.status(201).json(newTask);
-  } catch (error) {
-    res.status(500).json({ message: 'Failed to create task', error });
-  }
-};
-
-export const updateTask = async (req: Request, res: Response) => {
-  try {
-    const db = await openDb();
-    const { id } = req.params;
-    const { name, description }: Task = req.body;
-    const result = await db.run('UPDATE tasks SET name = ?, description = ? WHERE id = ?', [name, description, id]);
-
-    if (result.changes) {
-      res.json({ id: parseInt(id), name, description });
+  static async getById(req: Request, res: Response): Promise<void> {
+    const task = await TaskModel.findById(parseInt(req.params.id, 10));
+    if (task) {
+      res.json(task);
     } else {
       res.status(404).json({ message: 'Task not found' });
     }
-  } catch (error) {
-    res.status(500).json({ message: 'Failed to update task', error });
   }
-};
 
-export const deleteTask = async (req: Request, res: Response) => {
-  try {
-    const db = await openDb();
-    const { id } = req.params;
-    const result = await db.run('DELETE FROM tasks WHERE id = ?', [id]);
+  static async create(req: Request, res: Response): Promise<void> {
+    const newTask = req.body;
+    const id = await TaskModel.create(newTask);
+    res.status(201).json({ id, ...newTask });
+  }
 
-    if (result.changes) {
-      res.status(204).send();
+  static async update(req: Request, res: Response): Promise<void> {
+    const updatedTask = req.body;
+    const rows = await TaskModel.update(parseInt(req.params.id, 10), updatedTask);
+    if (rows > 0) {
+      res.json({ message: 'Task updated' });
     } else {
       res.status(404).json({ message: 'Task not found' });
     }
-  } catch (error) {
-    res.status(500).json({ message: 'Failed to delete task', error });
   }
-};
+
+  static async delete(req: Request, res: Response): Promise<void> {
+    const rows = await TaskModel.delete(parseInt(req.params.id, 10));
+    if (rows > 0) {
+      res.json({ message: 'Task deleted' });
+    } else {
+      res.status(404).json({ message: 'Task not found' });
+    }
+  }
+}
