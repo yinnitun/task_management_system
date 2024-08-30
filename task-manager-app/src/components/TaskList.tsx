@@ -47,7 +47,7 @@ const TaskList: React.FC = () => {
               <TableCell>{task.description}</TableCell>
               <TableCell>
                 <Button onClick={() => navigate(`/edit/${task.id}`)} variant="contained">Edit</Button>
-                <Button onClick={() => handleDelete(task.id!)} variant="contained" color="secondary">Delete</Button>
+                <Button onClick={() => handleDelete(task.id!)} variant="contained" color="secondary" style={{ marginLeft: '10px' }} >Delete</Button>
               </TableCell>
             </TableRow>
           ))}

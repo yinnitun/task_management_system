@@ -8,6 +8,10 @@ const TaskForm: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [task, setTask] = useState<Task>({ title: '', description: '', isCompleted: false });
+  const handleCancel = () => {
+    navigate('/');
+  };
+
 
   useEffect(() => {
     if (id) {
@@ -56,6 +60,15 @@ const TaskForm: React.FC = () => {
         />
         <Button type="submit" variant="contained" color="primary">
           {id ? 'Update Task' : 'Create Task'}
+        </Button>
+
+        <Button 
+          variant="contained" 
+          color="secondary" 
+          onClick={handleCancel} 
+          style={{ marginLeft: '10px' }}
+        >
+          Cancel
         </Button>
       </form>
     </Container>
