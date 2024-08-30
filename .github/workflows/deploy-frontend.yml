@@ -26,12 +26,12 @@ jobs:
 
     - name: Install dependencies
       run: npm install
-      working-directory: task-manager-frontend
+      working-directory: ./task-manager-app
 
     - name: Run tests
       run: npm test
-      working-directory: task-manager-frontend
+      working-directory: ./task-manager-app
 
     - name: Build frontend
       run: npm run build
-      working-directory: task-manager-frontend
+      working-directory: ./task-manager-app
