@@ -27,7 +27,7 @@ jobs:
       working-directory: ./task-manager-backend
 
     - name: Run TypeScript build
-      run: npx ts-node src/index.ts
+      run: npm run build
       working-directory: ./task-manager-backend
 
     - name: Run tests
